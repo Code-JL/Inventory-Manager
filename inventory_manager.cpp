@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <algorithm>
+#include <vector>
 
 using namespace std; // Using the standard namespace
 
@@ -81,14 +82,51 @@ public:
 };
 
 int main() {
-	Item item("Laptop", "A high-performance laptop.", 5, "images/laptop.jpg");
-	item.display();
 
-	item.setName("Desk");
-	item.setDescription("A wooden desk.");
-	item.setAmount(3);
-	item.setImage("images/desk.jpg");
-	item.display();
+	vector<Item> items;
+	items.emplace_back("Laptop", "A high-performance laptop.", 5, "images/laptop.jpg");
+
+	while (true) {
+		cout << "What would you like to do? (1: Read items, 2: Add an item, 0: Exit): ";
+		int choice;
+		cin >> choice;
+
+		if (choice == 1) {
+			if (items.empty()) {
+				cout << "No items to display.\n";
+			} else {
+				for (const auto &item : items) {
+					item.display();
+				}
+			}
+		} else if (choice == 2) {
+			string name, description, image;
+			int amount;
+
+			cout << "Enter item name: ";
+			cin.ignore();
+			getline(cin, name);
+
+			cout << "Enter item description: ";
+			getline(cin, description);
+
+			cout << "Enter item amount: ";
+			cin >> amount;
+
+			cout << "Enter item image path: ";
+			cin.ignore();
+			getline(cin, image);
+
+			items.emplace_back(name, description, amount, image);
+			cout << "Item added successfully!\n";
+		} else if (choice == 0) {
+			cout << "Exiting program. Goodbye!\n";
+			break;
+		} else {
+			cout << "Invalid choice. Please try again.\n";
+		}
+	}
 
 	return 0;
 }
+
