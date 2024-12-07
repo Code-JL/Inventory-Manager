@@ -7,6 +7,14 @@
 
 using namespace std; // Using the standard namespace
 
+
+// Helper function to convert string to lowercase
+string toLowerCase(const string& str) {
+	string lowerStr = str;
+	transform(lowerStr.begin(), lowerStr.end(), lowerStr.begin(), ::tolower);
+	return lowerStr;
+}
+
 // Class representing an item
 class Item {
 private:
@@ -15,13 +23,6 @@ private:
 	string description;               // Item description
 	string imagePath;       // Path to a photo
 	int amount;                       // Item quantity
-
-	// Helper function to convert string to lowercase
-	string toLowerCase(const string& str) const {
-		string lowerStr = str;
-		transform(lowerStr.begin(), lowerStr.end(), lowerStr.begin(), ::tolower);
-		return lowerStr;
-	}
 
 public:
 	// Constructor
@@ -145,9 +146,9 @@ void saveItemsToFile(const vector<Item> &items, const string &filePath) {
 
 	// Write each item to the file in CSV format
 	for (const auto &item : items) {
-		file << item.getName() << "," 
-		     << item.getDescription() << "," 
-		     << item.getAmount() << "," 
+		file << item.getName() << " |" 
+		     << item.getDescription() << " |" 
+		     << item.getAmount() << " |" 
 		     << item.getImage() << "\n";
 	}
 
@@ -212,6 +213,9 @@ vector<Item> LoadScreen(vector<Item> items, string saveFilePath) {
 
 	int choice;
 	while (choice != 0) {
+		cout << "--------------------------------------\n";
+		cout << "What would you like to do?\n";
+		cout << "--------------------------------------\n";
 		cout << "1. New Inventory\n";
 		cout << "2. Load Inventory\n";
 		cout << "0. Exit\n";
@@ -222,21 +226,23 @@ vector<Item> LoadScreen(vector<Item> items, string saveFilePath) {
 		{
 		case 0:
 			cout << "Exiting.";
-			return {};
+			return items;
 
 		case 1:
 			items.emplace_back("Sample Sign", "A sample sign, simple but effective", 1, "images/sample.jpg");
-			break;
+			return items;
 
 		case 2:
 			loadItemsFromFile(items, saveFilePath);
-			break;
+			return items;
 
 		default:
 			cout << "Invalid choice. Try again.\n";
 			break;
 		}
 	}
+
+	//This return should never be used, just here to prevent warnings
 	return items;
 }
 // Main function
@@ -258,6 +264,9 @@ int main() {
 				}
 			}
 
+		cout << "--------------------------------------\n";
+		cout << "What would you like to do?\n";
+		cout << "--------------------------------------\n";
 		cout << "1. Interact with an item\n";
 		cout << "2. Add an item\n";
 		cout << "3. Save items\n";
@@ -267,30 +276,44 @@ int main() {
 		int choice;
 		cin >> choice;
 
+		//handle invalid input
+		if (cin.fail()){
+			cin.clear();
+			cin.ignore(numeric_limits<streamsize>::max(), '\n');
+			cout << "Invalid input, please enter a number.\n";
+			continue;
+		}
+
 		if (choice == 1)
 		{
 			string item_name;
 			Item* current_item;
 
 			cout << "Name of item: ";
-			cin >> item_name;
+
+			cin.ignore(); // Clear leftover newline
+        	getline(cin, item_name); // Safely read the entire line
+			item_name = toLowerCase(item_name);
 
 			auto it = find_if(items.begin(), items.end(), [&item_name](const Item& item) {
 				return item.getName() == item_name;
 			});
 			if (it != items.end()) {
 				current_item = &*it;
-				current_item->display();
 
 				while (true) {
-					cout << "What would you like to do with the item?\n";
+
+					cout << "--------------------------------------\n";
+					current_item->display();
+					cout << "What would you like to do with this item?\n";
+					cout << "--------------------------------------\n";
 					cout << "1. Change name\n";
 					cout << "2. Change description\n";
 					cout << "3. Change image path\n";
 					cout << "4. Increment item count\n";
 					cout << "5. Decrement item count\n";
 					cout << "6. Delete item\n";
-					cout << "0. Exit\n";
+					cout << "0. Back\n";
 
 					int subchoice;
 					cin >> subchoice;
@@ -298,33 +321,37 @@ int main() {
 					string input;
 
 					if (subchoice == 1) {
-						cout << "Enter new name: ";
+						cout << "Current name: " << current_item->getName() << endl;
+						cout << "New name: ";
 						cin.ignore();
 						getline(cin, input);
 						current_item->setName(input);
 					} else if (subchoice == 2) {
-						cout << "Enter new description: ";
+						cout << "Current description: " << current_item->getDescription() << endl;
+						cout << "New description: ";
+						cin.ignore();
 						getline(cin, input);
 						current_item->setDescription(input);
 					} else if (subchoice == 3) {
-						cout << "Enter new image path: ";
+						cout << "Current image path: " << current_item->getImage() << endl;
+						cout << "New image path: ";
+						cin.ignore();
 						getline(cin, input);
 						current_item->setImage(input);
 					} else if (subchoice == 4) {
+						cout << "Current count: " << current_item->getAmount() << endl;
 						current_item->increment();
 					} else if (subchoice == 5) {
+						cout << "Current count: " << current_item->getAmount() << endl;
 						current_item->decrement();
 					} else if (subchoice == 6) {
 						auto it = find(items.begin(), items.end(), *current_item);
-						if (it != items.end()) {
-							items.erase(it);
-							cout << "Item deleted successfully!\n";
-						} else {
-							cout << "Error: Item not found.\n";
-						}
+						items.erase(it);
+						cout << "Item deleted.\n";
+						break;
 					} else if (subchoice == 0) {
-						cout << "Exiting.\n";
-						return 0;
+						cout << "Going back.\n";
+						break;
 					} else {
 						cout << "Invalid choice. Please try again.\n";
 					}
@@ -367,7 +394,7 @@ int main() {
 		// Exits the program
 		else if (choice == 0) {
 			cout << "Exiting program. Goodbye!\n";
-			return 0;
+			break;
 		}
 		// Invalid choice
 		else {
