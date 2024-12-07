@@ -152,7 +152,7 @@ string escapeForCSV(const string &field) {
  * @param items The vector of items to be saved.
  * @param filePath The path to the CSV file where items will be saved.
  */
-void saveItemsToFile(const vector<Item> &items, const string &filePath) {
+void saveItemsToFile(const vector<Item> &items, const string &filePath, char seperator = ',') {
     // Ensure the "save" directory exists
     filesystem::create_directory("save");
 
@@ -165,9 +165,9 @@ void saveItemsToFile(const vector<Item> &items, const string &filePath) {
 
     // Write each item to the file in CSV format
     for (const auto &item : items) {
-        file << escapeForCSV(item.getName()) << "," // Accessing name using getName()
-             << escapeForCSV(item.getDescription()) << ","
-             << item.getAmount() << "," // Accessing amount using getAmount()
+        file << escapeForCSV(item.getName()) << seperator // Accessing name using getName()
+             << escapeForCSV(item.getDescription()) << seperator
+             << item.getAmount() << seperator // Accessing amount using getAmount()
              << escapeForCSV(item.getImage()) << "\n";
     }
 
@@ -307,14 +307,12 @@ list<string> loadSettings() {
 
     // Close the file after reading
     file.close();
-    cout << "Settings loaded successfully.\n";
     return settings;
 }
 
 vector<Item> LoadScreen(vector<Item> items, string saveFilePath) {
 
 	int choice = -1;
-	char seperator = loadSettings().front()[0];
 
 	while (choice != 0) {
 		cout << "--------------------------------------\n";
@@ -349,7 +347,7 @@ vector<Item> LoadScreen(vector<Item> items, string saveFilePath) {
 				cout << "--------------------------------------\n";
 				cout << "Setting: What would you like to change?\n";
 				cout << "--------------------------------------\n";
-				cout << "1. CSV seperator\n";
+				cout << "1. Export CSV seperator\n";
 				cout << "\t- Default = (,)\n";
 				cout << "0. Back\n";
 
@@ -360,6 +358,7 @@ vector<Item> LoadScreen(vector<Item> items, string saveFilePath) {
 				string newseperator;
 
 				if (subchoice == 1) {
+					char seperator = loadSettings().front()[0];
 					cout << "Current seperator = " << seperator << "\n";
 					cout << "New seperator: ";
 
@@ -401,6 +400,7 @@ vector<Item> LoadScreen(vector<Item> items, string saveFilePath) {
 // Main function
 int main() {
 
+	char seperator = loadSettings().front()[0];
 	// Save file path
 	const string saveFilePath = "save/inventory.csv";
 
@@ -426,7 +426,8 @@ int main() {
 		cout << "--------------------------------------\n";
 		cout << "1. Interact with an item\n";
 		cout << "2. Add an item\n";
-		cout << "3. Save items\n";
+		cout << "3. Save inventory\n";
+		cout << "4. Export inventory\n";
 		cout << "0. Exit\n";
 		cout << "Enter your choice: ";
 		
@@ -467,8 +468,8 @@ int main() {
 					cout << "1. Change name\n";
 					cout << "2. Change description\n";
 					cout << "3. Change image path\n";
-					cout << "4. Increment item count\n";
-					cout << "5. Decrement item count\n";
+					cout << "4. Increment amount\n";
+					cout << "5. Decrement amount\n";
 					cout << "6. Delete item\n";
 					cout << "0. Back\n";
 
@@ -531,6 +532,7 @@ int main() {
 			getline(cin, name);
 
 			cout << "Enter item description: ";
+			cin.ignore();
 			getline(cin, description);
 
 			cout << "Enter item amount: ";
@@ -547,7 +549,15 @@ int main() {
 		else if (choice == 3) {
 			saveItemsToFile(items, saveFilePath);
 		}
+		else if (choice == 4) {
+			cout << "Name of export file: ";
+			cin.ignore();
+			string exportname;
+			getline(cin, exportname);
+			saveItemsToFile(items, "export/" + exportname + ".csv", seperator);
 
+			cout << "Items saved successfully  exported to export/" << exportname << ".csv\n";
+		}	
 		// Exits the program
 		else if (choice == 0) {
 			cout << "Exiting program. Goodbye!\n";
