@@ -76,10 +76,10 @@ public:
 
 	// Display the item's details (Temp)
 	void display() const {
-		cout << "Name: " << name << "\n"
-		     << "Description: " << description << "\n"
-		     << "Amount: " << amount << "\n"
-		     << "Image: " << imagePath << "\n";
+		cout << "Name: " << name
+		     << ", Description: " << description
+		     << ", Amount: " << amount
+		     << ", Image: " << imagePath << "\n";
 	}
 
 	//increase item quantity
@@ -95,6 +95,13 @@ public:
             cout << "Warning: Cannot decrement. Item count is already 0.\n";
         }
 	}
+
+	bool operator==(const Item& other) const {
+        return name == other.name && 
+               description == other.description && 
+               amount == other.amount && 
+               imagePath == other.imagePath;
+    }
 
 	/**
 	 * Deletes an item from the inventory.
@@ -116,11 +123,6 @@ public:
 			cout << "Error: Item not found.\n";
 		}
 	}
-
-
-
-
-
 };
 
 /**
@@ -193,36 +195,148 @@ void loadItemsFromFile(vector<Item> &items, const string &filePath) {
 	cout << "Items loaded successfully from " << filePath << endl;
 }
 
+//This function will get an item from an inventory, by being given the name of the item. it will then return the item
+const Item* GetItemByName(const vector<Item>& items, const string& name) {
+	auto it = lower_bound(items.begin(), items.end(), name, [](const Item& item, const string& other) {
+		return item.getName() < other;
+	});
 
-// Main function
-int main() {
-	vector<Item> items;
-	items.emplace_back("Laptop", "A high-performance laptop.", 5, "images/laptop.jpg");
+	if (it != items.end() && it->getName() == name) {
+		return &*it;
+	}
 
-	const string saveFilePath = "save/inventory.csv";
+	return nullptr;
+}
 
-	while (true) {
-		cout << "1. Read items\n";
-		cout << "2. Add an item\n";
-		cout << "3. Save items\n";
-		cout << "4. Load items\n";
-		cout << "5. Delete an item\n";
+vector<Item> LoadScreen(vector<Item> items, string saveFilePath) {
+
+	int choice;
+	while (choice != 0) {
+		cout << "1. New Inventory\n";
+		cout << "2. Load Inventory\n";
 		cout << "0. Exit\n";
-		cout << "Enter your choice: ";
-		
-		int choice;
+
 		cin >> choice;
 
-		// Reads the items
-		if (choice == 1) {
-			if (items.empty()) {
+		switch (choice)
+		{
+		case 0:
+			cout << "Exiting.";
+			return {};
+
+		case 1:
+			items.emplace_back("Sample Sign", "A sample sign, simple but effective", 1, "images/sample.jpg");
+			break;
+
+		case 2:
+			loadItemsFromFile(items, saveFilePath);
+			break;
+
+		default:
+			cout << "Invalid choice. Try again.\n";
+			break;
+		}
+	}
+	return items;
+}
+// Main function
+int main() {
+
+	// Save file path
+	const string saveFilePath = "save/inventory.csv";
+
+	vector<Item> items;
+	items = LoadScreen(items, saveFilePath);
+
+	while (true) {
+		// Displays item list
+		if (items.empty()) {
 				cout << "No items to display.\n";
 			} else {
 				for (const auto &item : items) {
 					item.display();
 				}
 			}
+
+		cout << "1. Interact with an item\n";
+		cout << "2. Add an item\n";
+		cout << "3. Save items\n";
+		cout << "0. Exit\n";
+		cout << "Enter your choice: ";
+		
+		int choice;
+		cin >> choice;
+
+		if (choice == 1)
+		{
+			string item_name;
+			Item* current_item;
+
+			cout << "Name of item: ";
+			cin >> item_name;
+
+			auto it = find_if(items.begin(), items.end(), [&item_name](const Item& item) {
+				return item.getName() == item_name;
+			});
+			if (it != items.end()) {
+				current_item = &*it;
+				current_item->display();
+
+				while (true) {
+					cout << "What would you like to do with the item?\n";
+					cout << "1. Change name\n";
+					cout << "2. Change description\n";
+					cout << "3. Change image path\n";
+					cout << "4. Increment item count\n";
+					cout << "5. Decrement item count\n";
+					cout << "6. Delete item\n";
+					cout << "0. Exit\n";
+
+					int subchoice;
+					cin >> subchoice;
+
+					string input;
+
+					if (subchoice == 1) {
+						cout << "Enter new name: ";
+						cin.ignore();
+						getline(cin, input);
+						current_item->setName(input);
+					} else if (subchoice == 2) {
+						cout << "Enter new description: ";
+						getline(cin, input);
+						current_item->setDescription(input);
+					} else if (subchoice == 3) {
+						cout << "Enter new image path: ";
+						getline(cin, input);
+						current_item->setImage(input);
+					} else if (subchoice == 4) {
+						current_item->increment();
+					} else if (subchoice == 5) {
+						current_item->decrement();
+					} else if (subchoice == 6) {
+						auto it = find(items.begin(), items.end(), *current_item);
+						if (it != items.end()) {
+							items.erase(it);
+							cout << "Item deleted successfully!\n";
+						} else {
+							cout << "Error: Item not found.\n";
+						}
+					} else if (subchoice == 0) {
+						cout << "Exiting.\n";
+						return 0;
+					} else {
+						cout << "Invalid choice. Please try again.\n";
+					}
+				}
+
+			}
+			else {
+				cout << "Item not found.\n";
+			}
+			
 		}
+		
 		// Adds an item
 		else if (choice == 2) {
 			string name, description, image;
@@ -249,32 +363,11 @@ int main() {
 		else if (choice == 3) {
 			saveItemsToFile(items, saveFilePath);
 		}
-		// Loads the items from file
-		else if (choice == 4) {
-			loadItemsFromFile(items, saveFilePath);
-		}
-		// Deletes an item
-		else if (choice == 5) {
-			if (items.empty()) {
-				cout << "No items to delete.\n";
-			} else {
-				string name;
-				cout << "Enter the name of the item to delete: ";
-				cin.ignore();
-				getline(cin, name);
 
-				for (auto it = items.begin(); it != items.end(); ++it) {
-					if (it->getName() == name) {
-						it->deleteItem(items, name);
-						break;
-					}
-				}
-			}
-		}
 		// Exits the program
 		else if (choice == 0) {
 			cout << "Exiting program. Goodbye!\n";
-			break;
+			return 0;
 		}
 		// Invalid choice
 		else {
@@ -284,4 +377,7 @@ int main() {
 
 	return 0;
 }
+
+
+
 
