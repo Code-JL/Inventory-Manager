@@ -1,0 +1,30 @@
+{
+    "tasks": [
+        {
+            "type": "cppbuild",
+            "label": "Build Project",
+            "command": "/usr/bin/g++",
+            "args": [
+                "-std=c++17",
+                "-fdiagnostics-color=always",
+                "-g",
+                "${workspaceFolder}/inventory_manager.cpp",
+                "${workspaceFolder}/src/item_class.cpp",
+                "-o",
+                "${workspaceFolder}/program"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "Build task for the project."
+        }
+    ],
+    "version": "2.0.0"
+}
