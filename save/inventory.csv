@@ -1,0 +1,5 @@
+"sample sign","A sample sign, simple but effective",1,"images/sample.jpg"
+"testtest1","First added item within the program.",50,"images are not yet important"
+"test2","A lot of something",500,"test2.jpg"
+"test3","a really long description for no reason, other then it is cool. thing description will be very hard to read as I currently have not developed a good GUI, command lines are hard to read. Also the amount of commas make this interesting, as i have this stored in a csv file.",2,"goodimage.jpg"
+"i could add quotation marks to this","If I add quotation marks to this item, it will mostlikely break the code.",505,"dontbreak.jpg"

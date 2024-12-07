@@ -78,9 +78,9 @@ public:
 	// Display the item's details (Temp)
 	void display() const {
 		cout << "Name: " << name
-		     << ", Description: " << description
-		     << ", Amount: " << amount
-		     << ", Image: " << imagePath << "\n";
+		     << " | Description: " << description
+		     << " | Amount: " << amount
+		     << " | Image: " << imagePath << "\n";
 	}
 
 	//increase item quantity
@@ -127,37 +127,85 @@ public:
 };
 
 /**
+ * Escapes a field for CSV by doubling quotes and wrapping it in quotes.
+ *
+ * @param field The string to escape.
+ * @return The escaped string.
+ */
+string escapeForCSV(const string &field) {
+    string escapedField = "\"";
+    for (char c : field) {
+        if (c == '"') {
+            escapedField += "\"\""; // Escape quotes
+        } else {
+            escapedField += c;
+        }
+    }
+    escapedField += "\"";
+    return escapedField;
+}
+
+/**
  * Saves items to a CSV file at the specified file path.
- * 
+ *
  * @param items The vector of items to be saved.
  * @param filePath The path to the CSV file where items will be saved.
  */
 void saveItemsToFile(const vector<Item> &items, const string &filePath) {
-	// Ensure the "save" directory exists
-	filesystem::create_directory("save");
+    // Ensure the "save" directory exists
+    filesystem::create_directory("save");
 
-	// Open the file for writing
-	ofstream file(filePath);
-	if (!file.is_open()) {
-		// If the file cannot be opened, print an error message and return
-		cout << "Error: Could not open file for saving.\n";
-		return;
-	}
+    // Open the file for writing
+    ofstream file(filePath);
+    if (!file.is_open()) {
+        cout << "Error: Could not open file for saving.\n";
+        return;
+    }
 
-	// Write each item to the file in CSV format
-	for (const auto &item : items) {
-		file << item.getName() << " |" 
-		     << item.getDescription() << " |" 
-		     << item.getAmount() << " |" 
-		     << item.getImage() << "\n";
-	}
+    // Write each item to the file in CSV format
+    for (const auto &item : items) {
+        file << escapeForCSV(item.getName()) << "," // Accessing name using getName()
+             << escapeForCSV(item.getDescription()) << ","
+             << item.getAmount() << "," // Accessing amount using getAmount()
+             << escapeForCSV(item.getImage()) << "\n";
+    }
 
-	// Close the file after writing
-	file.close();
-	cout << "Items saved successfully to " << filePath << endl;
+    // Close the file after writing
+    file.close();
+    cout << "Items saved successfully to " << filePath << endl;
 }
 
-// Function to load items from a CSV file
+
+
+/**
+ * Splits a CSV line into fields, respecting quotes.
+ *
+ * @param line The line to split.
+ * @return A vector of strings representing the fields.
+ */
+vector<string> parseCSVLine(const string &line) {
+    vector<string> fields;
+    string field;
+    bool inQuotes = false;
+
+    for (size_t i = 0; i < line.size(); ++i) {
+        char c = line[i];
+        if (c == '"') {
+            inQuotes = !inQuotes; // Toggle quote state
+        } else if (c == ',' && !inQuotes) {
+            // End of field
+            fields.push_back(field);
+            field.clear();
+        } else {
+            // Add to the current field
+            field += c;
+        }
+    }
+    fields.push_back(field); // Add the last field
+    return fields;
+}
+
+
 /**
  * Loads items from a CSV file and stores them in the provided vector.
  *
@@ -165,35 +213,31 @@ void saveItemsToFile(const vector<Item> &items, const string &filePath) {
  * @param filePath The path to the CSV file to load from.
  */
 void loadItemsFromFile(vector<Item> &items, const string &filePath) {
-	ifstream file(filePath);
-	if (!file.is_open()) {
-		cout << "Error: Could not open file for loading.\n";
-		return;
-	}
+    ifstream file(filePath);
+    if (!file.is_open()) {
+        cout << "Error: Could not open file for loading.\n";
+        return;
+    }
 
-	string line;
-	while (getline(file, line)) {
-		size_t pos = 0;
-		vector<string> fields;
+    string line;
+    while (getline(file, line)) {
+        vector<string> fields = parseCSVLine(line);
 
-		// Split the line by commas
-		while ((pos = line.find(',')) != string::npos) {
-			fields.push_back(line.substr(0, pos));
-			line.erase(0, pos + 1);
-		}
-		fields.push_back(line); // Add the last field
+        // Ensure the line has the correct number of fields
+        if (fields.size() == 4) {
+            try {
+                // Create a new item and add it to the vector
+                items.emplace_back(fields[0], fields[1], stoi(fields[2]), fields[3]);
+            } catch (const invalid_argument &e) {
+                cout << "Warning: Invalid number format in line. Skipping.\n";
+            }
+        } else {
+            cout << "Warning: Skipping invalid line in file.\n";
+        }
+    }
 
-		// Ensure the line has the correct number of fields
-		if (fields.size() == 4) {
-			// Create a new item and add it to the vector
-			items.emplace_back(fields[0], fields[1], stoi(fields[2]), fields[3]);
-		} else {
-			cout << "Warning: Skipping invalid line in file.\n";
-		}
-	}
-
-	file.close();
-	cout << "Items loaded successfully from " << filePath << endl;
+    file.close();
+    cout << "Items loaded successfully from " << filePath << endl;
 }
 
 //This function will get an item from an inventory, by being given the name of the item. it will then return the item
@@ -245,6 +289,8 @@ vector<Item> LoadScreen(vector<Item> items, string saveFilePath) {
 	//This return should never be used, just here to prevent warnings
 	return items;
 }
+
+
 // Main function
 int main() {
 
