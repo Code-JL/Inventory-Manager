@@ -4,6 +4,7 @@
 #include <vector>
 #include <fstream>
 #include <filesystem>
+#include <list>
 
 using namespace std; // Using the standard namespace
 
@@ -253,23 +254,83 @@ const Item* GetItemByName(const vector<Item>& items, const string& name) {
 	return nullptr;
 }
 
+
+/**
+ * Saves the given settings to the "save/settings.cfg" file.
+ *
+ * @param settings A list of strings representing the settings to save.
+ */
+void SaveSettings(const list<string>& settings) {
+    ofstream file("save/settings.cfg");
+    if (!file.is_open()) {
+        cout << "Error: Could not open settings file for saving.\n";
+        return;
+    }
+
+    // Write each setting to the file
+    for (const auto& setting : settings) {
+        file << setting << endl;
+    }
+
+    file.close();
+    cout << "Settings saved successfully.\n";
+}
+
+
+bool fileDoesNotExist(const std::string& filePath) {
+	std::ifstream file(filePath);
+	return !file.is_open();  // Returns true if file does not exist
+}
+/**
+ * Loads the settings from the "save/settings.cfg" file.
+ *
+ * @return A list of strings representing the settings.
+ */
+list<string> loadSettings() {
+
+    list<string> settings;
+    if (fileDoesNotExist("save/settings.cfg")) {
+		cout << "Could not find settings file.\n";
+
+        // Create a new settings file with default settings
+        SaveSettings(list<string>{","});
+        cout << "Created new settings file.\n";
+	}
+
+	ifstream file("save/settings.cfg");
+
+    string line;
+    // Read each line from the file and add it to the settings list
+    while (getline(file, line)) {
+        settings.push_back(line);
+    }
+
+    // Close the file after reading
+    file.close();
+    cout << "Settings loaded successfully.\n";
+    return settings;
+}
+
 vector<Item> LoadScreen(vector<Item> items, string saveFilePath) {
 
-	int choice;
+	int choice = -1;
+	char seperator = loadSettings().front()[0];
+
 	while (choice != 0) {
 		cout << "--------------------------------------\n";
 		cout << "What would you like to do?\n";
 		cout << "--------------------------------------\n";
 		cout << "1. New Inventory\n";
 		cout << "2. Load Inventory\n";
+		cout << "3. Settings\n";
 		cout << "0. Exit\n";
 
 		cin >> choice;
+		cin.ignore(numeric_limits<streamsize>::max(), '\n');
 
-		switch (choice)
-		{
+		switch (choice) {
 		case 0:
-			cout << "Exiting.";
+			cout << "Exiting.\n";
 			return items;
 
 		case 1:
@@ -279,6 +340,52 @@ vector<Item> LoadScreen(vector<Item> items, string saveFilePath) {
 		case 2:
 			loadItemsFromFile(items, saveFilePath);
 			return items;
+		
+		case 3:
+
+			int subchoice;
+
+			while (true) {
+				cout << "--------------------------------------\n";
+				cout << "Setting: What would you like to change?\n";
+				cout << "--------------------------------------\n";
+				cout << "1. CSV seperator\n";
+				cout << "\t- Default = (,)\n";
+				cout << "0. Back\n";
+
+				cin >> subchoice;
+
+				cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+				string newseperator;
+
+				if (subchoice == 1) {
+					cout << "Current seperator = " << seperator << "\n";
+					cout << "New seperator: ";
+
+					cin >> newseperator;
+
+					cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+					if (newseperator == "\"" || newseperator == "\'") {
+						cout << "Invalid seperator. Try again.\n";
+					}
+					else {
+						seperator = newseperator[0];
+						SaveSettings(list<string>{newseperator});
+						break;
+					}
+				}
+				else if (subchoice == 0) {
+					cout << "Going back.\n";
+					break;
+				}
+				else {
+					cout << "Invalid choice. Please try again.\n";
+				}
+
+			}
+			break;
 
 		default:
 			cout << "Invalid choice. Try again.\n";
@@ -299,6 +406,10 @@ int main() {
 
 	vector<Item> items;
 	items = LoadScreen(items, saveFilePath);
+
+	if (items.empty()) {
+    	return 0;
+	}
 
 	while (true) {
 		// Displays item list
