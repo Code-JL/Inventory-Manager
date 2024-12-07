@@ -81,27 +81,86 @@ public:
 		     << "Amount: " << amount << "\n"
 		     << "Image: " << imagePath << "\n";
 	}
+
+	//increase item quantity
+	void increment() {
+		++amount;
+	}
+
+	// Decrease item quantity
+    void decrement() {
+        if (amount > 0) {
+            --amount;
+        } else {
+            cout << "Warning: Cannot decrement. Item count is already 0.\n";
+        }
+	}
+
+	/**
+	 * Deletes an item from the inventory.
+	 *
+	 * @param items The vector to delete the item from.
+	 * @param itemName The name of the item to delete.
+	 */
+	void deleteItem(vector<Item>& items, const string& itemName) {
+		auto it = find_if(items.begin(), items.end(), [&itemName](const Item& item) {
+			// Find the item in the vector based on its name
+			return item.getName() == itemName;
+		});
+
+		if (it != items.end()) {
+			// Remove the item from the vector
+			items.erase(it);
+			cout << "Item deleted successfully!\n";
+		} else {
+			cout << "Error: Item not found.\n";
+		}
+	}
+
+
+
+
+
 };
 
+/**
+ * Saves items to a CSV file at the specified file path.
+ * 
+ * @param items The vector of items to be saved.
+ * @param filePath The path to the CSV file where items will be saved.
+ */
 void saveItemsToFile(const vector<Item> &items, const string &filePath) {
 	// Ensure the "save" directory exists
 	filesystem::create_directory("save");
 
+	// Open the file for writing
 	ofstream file(filePath);
 	if (!file.is_open()) {
+		// If the file cannot be opened, print an error message and return
 		cout << "Error: Could not open file for saving.\n";
 		return;
 	}
 
+	// Write each item to the file in CSV format
 	for (const auto &item : items) {
-		file << item.getName() << "," << item.getDescription() << "," << item.getAmount() << "," << item.getImage() << "\n";
+		file << item.getName() << "," 
+		     << item.getDescription() << "," 
+		     << item.getAmount() << "," 
+		     << item.getImage() << "\n";
 	}
 
+	// Close the file after writing
 	file.close();
 	cout << "Items saved successfully to " << filePath << endl;
 }
 
 // Function to load items from a CSV file
+/**
+ * Loads items from a CSV file and stores them in the provided vector.
+ *
+ * @param items The vector to store the loaded items in.
+ * @param filePath The path to the CSV file to load from.
+ */
 void loadItemsFromFile(vector<Item> &items, const string &filePath) {
 	ifstream file(filePath);
 	if (!file.is_open()) {
@@ -123,6 +182,7 @@ void loadItemsFromFile(vector<Item> &items, const string &filePath) {
 
 		// Ensure the line has the correct number of fields
 		if (fields.size() == 4) {
+			// Create a new item and add it to the vector
 			items.emplace_back(fields[0], fields[1], stoi(fields[2]), fields[3]);
 		} else {
 			cout << "Warning: Skipping invalid line in file.\n";
@@ -142,10 +202,18 @@ int main() {
 	const string saveFilePath = "save/inventory.csv";
 
 	while (true) {
-		cout << "What would you like to do? (1: Read items, 2: Add an item, 3: Save items, 4: Load items, 0: Exit): ";
+		cout << "1. Read items\n";
+		cout << "2. Add an item\n";
+		cout << "3. Save items\n";
+		cout << "4. Load items\n";
+		cout << "5. Delete an item\n";
+		cout << "0. Exit\n";
+		cout << "Enter your choice: ";
+		
 		int choice;
 		cin >> choice;
 
+		// Reads the items
 		if (choice == 1) {
 			if (items.empty()) {
 				cout << "No items to display.\n";
@@ -154,7 +222,9 @@ int main() {
 					item.display();
 				}
 			}
-		} else if (choice == 2) {
+		}
+		// Adds an item
+		else if (choice == 2) {
 			string name, description, image;
 			int amount;
 
@@ -174,14 +244,40 @@ int main() {
 
 			items.emplace_back(name, description, amount, image);
 			cout << "Item added successfully!\n";
-		} else if (choice == 3) {
+		}
+		// Saves the items to file
+		else if (choice == 3) {
 			saveItemsToFile(items, saveFilePath);
-		} else if (choice == 4) {
+		}
+		// Loads the items from file
+		else if (choice == 4) {
 			loadItemsFromFile(items, saveFilePath);
-		} else if (choice == 0) {
+		}
+		// Deletes an item
+		else if (choice == 5) {
+			if (items.empty()) {
+				cout << "No items to delete.\n";
+			} else {
+				string name;
+				cout << "Enter the name of the item to delete: ";
+				cin.ignore();
+				getline(cin, name);
+
+				for (auto it = items.begin(); it != items.end(); ++it) {
+					if (it->getName() == name) {
+						it->deleteItem(items, name);
+						break;
+					}
+				}
+			}
+		}
+		// Exits the program
+		else if (choice == 0) {
 			cout << "Exiting program. Goodbye!\n";
 			break;
-		} else {
+		}
+		// Invalid choice
+		else {
 			cout << "Invalid choice. Please try again.\n";
 		}
 	}
