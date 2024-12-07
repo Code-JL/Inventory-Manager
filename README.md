@@ -71,7 +71,7 @@ The GUI will feature:
 ### Building the Project
 1. Clone this repository:
    ```bash
-   git clone https://github.com/username/inventory-manager.git
+   git clone https://github.com/Code-JL/Inventory-Manager.git
    ```
 2. Build the project using your preferred build system (e.g., CMake):
    ```bash
@@ -91,7 +91,7 @@ The GUI will feature:
 ---
 
 ## Help and Documentation
-For detailed guidance, check out the [PDF Manual](link-to-pdf) or visit the [GitHub Repository](https://github.com/username/inventory-manager).
+For detailed guidance, check out the [PDF Manual](https://code-jl.github.io/projects/inventory_manager/help.pdf) or visit the [Portfolio Website About Page](https://code-jl.github.io/projects/inventory_manager/about.html).
 
 ---
 
