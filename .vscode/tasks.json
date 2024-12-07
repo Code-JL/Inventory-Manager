@@ -10,6 +10,7 @@
                 "-g",
                 "${workspaceFolder}/inventory_manager.cpp",
                 "${workspaceFolder}/src/item_class.cpp",
+                "${workspaceFolder}/src/save_load.cpp",
                 "-o",
                 "${workspaceFolder}/program"
             ],
