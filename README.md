@@ -1,62 +1,100 @@
 # Inventory Manager
 
-A **C++ Inventory Management Program** designed to handle a collection of items with various attributes. This application is a discontinued console-based program for managing inventory.
-
----
+A robust C++ inventory management system that allows users to create, modify, and track inventory items with detailed information and persistent storage capabilities.
 
 ## Features
 
-### 1. Item Management
-- Store multiple items with the following properties:
-  - **Name**: Item name (case-insensitive, stored in lowercase).
-  - **Description**: A string describing the item.
-  - **Count**: An integer representing the item's quantity.
-  - **Image Path**: An optional path to an image associated with the item.
+- **Item Management**
+  - Create new inventory items with name, description, quantity, and image path
+  - Modify existing items (name, description, quantity, image path)
+  - Increment/decrement item quantities
+  - Delete items
+  - Case-insensitive item search
 
-### 2. Inventory Management Options
-- **Add Items**: Add new items with specified attributes (name, description, count, and image path).
-- **Modify Items**:
-  - Change item name.
-  - Update description.
-  - Set a new image path.
-  - Increment or decrement item quantity.
-- **Delete Items**: Remove items from the inventory.
-- **View Items**: Display all items in the inventory.
+- **Data Persistence**
+  - Save inventory to CSV files
+  - Load inventory from saved files
+  - Export inventory with custom separators
+  - Automatic settings management
 
-### 3. File Operations
-- **Save Inventory**: Save the current inventory to a CSV file.
-- **Load Inventory**: Load items from a CSV file into the inventory.
-- **Export Inventory**: Export the inventory to a user-specified file with a configurable delimiter (default is `,`).
+- **User Interface**
+  - Interactive command-line interface
+  - Clear menu-driven operation
+  - Input validation and error handling
 
-### 4. Settings
-- Configure the CSV export delimiter, ensuring compatibility with different formats.
+## Installation
 
-### 5. User Interface
-- Console-based menu system for easy navigation:
-  - Main menu options include creating a new inventory, loading an inventory, and accessing settings.
-  - Item interaction menu for modifying individual item attributes.
+1. Clone the repository:
+```bash
+git clone https://github.com/yourusername/Inventory-Manager.git
+```
+2. Navigate to the project directory:
+```bash
+cd Inventory-Manager
+```
+3. Compile the program:
+```bash
+g++ inventory_manager.cpp src/item_class.cpp src/save_load.cpp -o inventory_manager
+```
 
----
+## Usage
 
-## Getting Started
+1. Run the compiled program:
+```bash
+./inventory_manager
+```
+2. Main Menu Options:
+   - Create new inventory
+   - Load existing inventory
+   - Modify settings
+   - Manage items
+   - Save/Export inventory
+   - File Structure
 
-### Prerequisites
-- A C++ compiler (e.g., GCC, Clang, or MSVC).
+## File Structure
+```bash
+.
+├── inventory_manager.cpp    # Main program file
+├── src/
+│   ├── item_class.h        # Item class declaration
+│   ├── item_class.cpp      # Item class implementation
+│   ├── save_load.h         # File operations declaration
+│   └── save_load.cpp       # File operations implementation
+└── save/
+    ├── inventory.csv       # Default inventory storage
+    └── settings.cfg        # Program settings
+```
 
-### Building the Project
-1. Clone this repository:
-   ```bash
-   git clone https://github.com/Code-JL/Inventory-Manager.git
-   ```
-2. Build the project using your preferred build system:
-   ```bash
-   mkdir build
-   cd build
-   cmake ..
-   make
-   ```
+## Data Storage
 
----
+- Inventory data is stored in CSV format
+- Default save location: `save/inventory.csv`
+- Custom export options available with configurable separators
+- Settings stored in `save/settings.cfg`
+
+## Configuration
+
+- CSV separator character can be customized through settings
+- Default separator: comma (,)
+- Settings are persistent between sessions
+
+## Contributing
+
+- Fork the repository
+- Create your feature branch (`git checkout -b feature/AmazingFeature`)
+- Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+- Push to the branch (`git push origin feature/AmazingFeature`)
+- Open a Pull Request
 
 ## License
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+
+This project is licensed under the terms of the included LICENSE file.
+
+## Technical Details
+
+- Written in C++
+- Uses standard library containers (vector, list)
+- Implements file I/O operations
+- Supports CSV parsing and generation
+- Error handling for file operations and user input
+
