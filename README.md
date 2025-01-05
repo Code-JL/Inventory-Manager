@@ -88,7 +88,7 @@ g++ inventory_manager.cpp src/item_class.cpp src/save_load.cpp -o inventory_mana
 
 ## License
 
-This project is licensed under the terms of the included LICENSE file.
+This project is licensed under the terms of the included [LICENSE](LICENSE) file.
 
 ## Technical Details
 
